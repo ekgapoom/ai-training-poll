@@ -10,7 +10,7 @@ import textwrap
 
 # --- 1. ตั้งค่าหน้าเว็บ ---
 st.set_page_config(
-    page_title="กิจกรรมที่ 1: Check-in & AI Readiness (100 Users)",
+    page_title="กิจกรรมที่ 1: Check-in & AI Readiness",
     page_icon="🤖",
     layout="wide"
 )
