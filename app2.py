@@ -4,7 +4,6 @@ import pandas as pd
 import plotly.express as px
 import qrcode
 from io import BytesIO
-import textwrap
 
 # --- 1. ตั้งค่าหน้าเว็บ ---
 st.set_page_config(
@@ -13,90 +12,90 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- 2. ปรับแต่ง CSS (ล็อกสีตัวอักษรให้อ่านง่ายทุกโหมด) ---
-custom_css = textwrap.dedent("""
+# --- 2. ปรับแต่ง CSS ล็อกสีตัวอักษรให้อ่านง่าย คมชัดทุกโหมด ---
+custom_css = """
 <style>
-    .main-header {
-        font-size: 24px;
-        font-weight: 700;
-        color: #1E3A8A;
-        margin-bottom: 5px;
-    }
-    .sub-header {
-        font-size: 15px;
-        color: #4B5563;
-        margin-bottom: 20px;
-    }
-    .case-card-ai {
-        background-color: #FFF1F2 !important;
-        border-radius: 10px;
-        padding: 16px;
-        border: 1px solid #FECDD3;
-        border-left: 5px solid #E11D48;
-        font-size: 14.5px;
-        color: #1E293B !important;
-        margin-bottom: 14px;
-        line-height: 1.6;
-    }
-    .case-card-pedagogy {
-        background-color: #F0FDF4 !important;
-        border-radius: 10px;
-        padding: 16px;
-        border: 1px solid #BBF7D0;
-        border-left: 5px solid #16A34A;
-        font-size: 14.5px;
-        color: #1E293B !important;
-        margin-bottom: 14px;
-        line-height: 1.6;
-    }
-    .analysis-card {
-        background-color: #FFFFFF !important;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 16px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        border: 1px solid #E2E8F0;
-        border-top: 5px solid #4F46E5;
-        color: #1E293B !important;
-    }
-    .badge-bias {
-        background-color: #FEE2E2 !important;
-        color: #991B1B !important;
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
-        margin-right: 4px;
-        margin-bottom: 4px;
-    }
-    .badge-student {
-        background-color: #EEF2FF !important;
-        color: #3730A3 !important;
-        padding: 3px 10px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 600;
-    }
-    .must-define-box {
-        background-color: #F0F9FF !important;
-        border-left: 3px solid #0284C7;
-        padding: 10px 12px;
-        border-radius: 0 8px 8px 0;
-        font-size: 13.5px;
-        margin-top: 10px;
-        color: #0C4A6E !important;
-    }
+.main-header {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1E3A8A;
+    margin-bottom: 5px;
+}
+.sub-header {
+    font-size: 15px;
+    color: #4B5563;
+    margin-bottom: 20px;
+}
+.case-card-ai {
+    background-color: #FFF1F2 !important;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #FECDD3;
+    border-left: 5px solid #E11D48;
+    font-size: 14.5px;
+    color: #1E293B !important;
+    margin-bottom: 14px;
+    line-height: 1.6;
+}
+.case-card-pedagogy {
+    background-color: #F0FDF4 !important;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #BBF7D0;
+    border-left: 5px solid #16A34A;
+    font-size: 14.5px;
+    color: #1E293B !important;
+    margin-bottom: 14px;
+    line-height: 1.6;
+}
+.analysis-card {
+    background-color: #FFFFFF !important;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #E2E8F0;
+    border-top: 5px solid #4F46E5;
+    color: #1E293B !important;
+}
+.badge-bias {
+    background-color: #FEE2E2 !important;
+    color: #991B1B !important;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+.badge-student {
+    background-color: #EEF2FF !important;
+    color: #3730A3 !important;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.must-define-box {
+    background-color: #F0F9FF !important;
+    border-left: 3px solid #0284C7;
+    padding: 10px 12px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13.5px;
+    margin-top: 10px;
+    color: #0C4A6E !important;
+}
 </style>
-""")
+"""
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# --- 3. ระบบฐานข้อมูล SQLite (ปรับแต่งรองรับ 100+ ผู้ใช้พร้อมกัน) ---
+# --- 3. ระบบฐานข้อมูล SQLite (รองรับ 100+ คนพร้อมกัน) ---
 DB_NAME = "case_study_act2_individual.db"
 
 def get_connection():
     conn = sqlite3.connect(DB_NAME, timeout=30.0, check_same_thread=False)
-    conn.execute("PRAGMA journal_mode=WAL;")  # ป้องกันปัญหา DB Lock เมื่อส่งพร้อมกัน
+    conn.execute("PRAGMA journal_mode=WAL;")
     return conn
 
 def init_db():
@@ -145,30 +144,13 @@ view_mode = st.sidebar.radio(
 # 5. หน้านักศึกษา (Individual Submission)
 # ==============================================================================
 if view_mode == "📱 สำหรับนักศึกษา (ส่งงานเดี่ยว)":
-    header_html = textwrap.dedent("""
-    <div class='main-header'>⚖️ กิจกรรมที่ 2: วิเคราะห์กรณีศึกษา (งานเดี่ยว)</div>
-    <div class='sub-header'>"Pedagogy Leads, AI Follows" (ศาสตร์การสอนต้องนำ เทคโนโลยีต้องตาม)</div>
-    """)
-    st.markdown(header_html, unsafe_allow_html=True)
+    st.markdown("<div class='main-header'>⚖️ กิจกรรมที่ 2: วิเคราะห์กรณีศึกษา (งานเดี่ยว)</div><div class='sub-header'>\"Pedagogy Leads, AI Follows\" (ศาสตร์การสอนต้องนำ เทคโนโลยีต้องตาม)</div>", unsafe_allow_html=True)
 
-    # กล่องกรณีศึกษา (แก้ปัญหาสีฟอนต์กลืนกับพื้นหลังแล้ว)
     col_c1, col_c2 = st.columns(2)
     with col_c1:
-        case1_html = textwrap.dedent("""
-        <div class='case-card-ai'>
-            <b style='color: #9F1239; font-size: 15px;'>📕 แผนที่ 1: AI-Driven (ให้ AI คิดแทน 100%)</b><br>
-            ใช้ Prompt กว้างๆ สั่งให้ AI สร้างแผนการสอนที่สมบูรณ์แบบตามทฤษฎี แต่ใช้อุปกรณ์ที่โรงเรียนไม่มี และไม่เข้ากับบริบทเด็กในพื้นที่
-        </div>
-        """)
-        st.markdown(case1_html, unsafe_allow_html=True)
+        st.markdown("<div class='case-card-ai'><b style='color: #9F1239; font-size: 15px;'>📕 แผนที่ 1: AI-Driven (ให้ AI คิดแทน 100%)</b><br>ใช้ Prompt กว้างๆ สั่งให้ AI สร้างแผนการสอนที่สมบูรณ์แบบตามทฤษฎี แต่ใช้อุปกรณ์ที่โรงเรียนไม่มี และไม่เข้ากับบริบทเด็กในพื้นที่</div>", unsafe_allow_html=True)
     with col_c2:
-        case2_html = textwrap.dedent("""
-        <div class='case-card-pedagogy'>
-            <b style='color: #166534; font-size: 15px;'>📗 แผนที่ 2: Pedagogy-Driven (ครูนำ AI ตาม)</b><br>
-            ครูกำหนดเป้าหมายและข้อจำกัดก่อน (Pedagogy) แล้วใช้ AI ช่วยคิดเกมและการประเมินผลที่สอดคล้องกับเด็กในชุมชน
-        </div>
-        """)
-        st.markdown(case2_html, unsafe_allow_html=True)
+        st.markdown("<div class='case-card-pedagogy'><b style='color: #166534; font-size: 15px;'>📗 แผนที่ 2: Pedagogy-Driven (ครูนำ AI ตาม)</b><br>ครูกำหนดเป้าหมายและข้อจำกัดก่อน (Pedagogy) แล้วใช้ AI ช่วยคิดเกมและการประเมินผลที่สอดคล้องกับเด็กในชุมชน</div>", unsafe_allow_html=True)
 
     if "submitted_act2_ind" not in st.session_state:
         st.session_state.submitted_act2_ind = False
@@ -226,16 +208,12 @@ if view_mode == "📱 สำหรับนักศึกษา (ส่งง�
             st.rerun()
 
 # ==============================================================================
-# 6. หน้าจอโปรเจกเตอร์ / Canva Embed (Live Dashboard รองรับ 100 คน)
+# 6. หน้าจอโปรเจกเตอร์ / Canva Embed (Live Dashboard)
 # ==============================================================================
 else:
     col_t, col_btn = st.columns([3, 1])
     with col_t:
-        dash_header = textwrap.dedent("""
-        <div class='main-header'>📊 Live Insights: เจาะลึกจุดบอด "AI-Driven vs Pedagogy-Driven"</div>
-        <div class='sub-header'>สรุปภาพรวมความคิดเห็นของนักศึกษาทั้ง 100 คน แบบเรียลไทม์</div>
-        """)
-        st.markdown(dash_header, unsafe_allow_html=True)
+        st.markdown("<div class='main-header'>📊 Live Insights: เจาะลึกจุดบอด \"AI-Driven vs Pedagogy-Driven\"</div><div class='sub-header'>สรุปภาพรวมความคิดเห็นของนักศึกษาทั้ง 100 คน แบบเรียลไทม์</div>", unsafe_allow_html=True)
     with col_btn:
         if st.button("🔄 อัปเดตข้อมูลสด (Refresh)", use_container_width=True):
             st.rerun()
@@ -250,12 +228,11 @@ else:
         qr.save(buf, format="PNG")
         st.image(buf.getvalue(), caption="สแกนเพื่อร่วมทำกิจกรรมที่ 2", width=220)
     else:
-        # แถบสรุปจำนวน
         total_responses = len(df)
         m1, m2 = st.columns([1, 3])
         m1.metric("👥 ส่งคำตอบแล้ว", f"{total_responses} คน")
-        
-        # ประมวลผลกราฟสรุป Bias (เหมาะมากสำหรับการสรุปผล 100 คน)
+
+        # ประมวลผลกราฟแท่ง Bias
         all_biases = []
         for b_str in df["bias_dimensions"].dropna():
             all_biases.extend([b.strip() for b in b_str.split(",") if b.strip()])
@@ -277,14 +254,13 @@ else:
 
         st.markdown("---")
         
-        # ส่วนค้นหาและแสดงผลการ์ดรายบุคคล (เพื่อประสิทธิภาพในการแสดงผล 100 รายการ)
+        # ส่วนค้นหาและแบ่งหน้าแสดงผล
         col_s1, col_s2 = st.columns([2, 1])
         with col_s1:
             search_query = st.text_input("🔍 ค้นหาชื่อนักศึกษา / รหัส / สาขา:", placeholder="พิมพ์ค้นหา...")
         with col_s2:
             items_per_page = st.selectbox("แสดงผลหน้าละ:", [10, 20, 50, 100], index=0)
 
-        # กรองข้อมูล
         filtered_df = df
         if search_query.strip():
             filtered_df = df[
@@ -294,33 +270,28 @@ else:
 
         st.caption(f"แสดง {min(items_per_page, len(filtered_df))} จากทั้งหมด {len(filtered_df)} รายการ")
 
-        # แสดงการ์ด 2 คอลัมน์
+        # แสดงผลการ์ดโดยไม่มี indentation และแปลง \n เป็น <br>
         cols = st.columns(2)
         for idx, row in filtered_df.head(items_per_page).reset_index().iterrows():
             col_target = cols[idx % 2]
             with col_target:
                 badges_html = "".join([f"<span class='badge-bias'>⚠️ {b.strip()}</span>" for b in row['bias_dimensions'].split(",") if b.strip()])
+                weaknesses_clean = str(row['weaknesses']).replace('\n', '<br>')
+                must_define_clean = str(row['must_define_first']).replace('\n', '<br>')
                 
-                card_html = textwrap.dedent(f"""
-                <div class='analysis-card'>
-                    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;'>
-                        <span style='font-size: 16px; font-weight: bold; color: #1E3A8A;'>👤 {row['student_name']}</span>
-                        <span class='badge-student'>{row['student_id']}</span>
-                    </div>
-                    <div style='margin-bottom: 8px;'>{badges_html}</div>
-                    
-                    <div style='font-size: 13.5px; color: #334155; margin-bottom: 8px;'>
-                        <b>🔍 จุดบอดของแผนที่ 1:</b><br>{row['weaknesses']}
-                    </div>
-                    
-                    <div class='must-define-box'>
-                        <b>🔑 สิ่งที่ครูต้องกำหนดก่อนใช้ AI:</b><br>{row['must_define_first']}
-                    </div>
-                </div>
-                """)
+                card_html = (
+                    f"<div class='analysis-card'>"
+                    f"<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;'>"
+                    f"<span style='font-size:16px;font-weight:bold;color:#1E3A8A;'>👤 {row['student_name']}</span>"
+                    f"<span class='badge-student'>{row['student_id']}</span>"
+                    f"</div>"
+                    f"<div style='margin-bottom:8px;'>{badges_html}</div>"
+                    f"<div style='font-size:13.5px;color:#1E293B;margin-bottom:8px;'><b>🔍 จุดบอดของแผนที่ 1:</b><br>{weaknesses_clean}</div>"
+                    f"<div class='must-define-box'><b>🔑 สิ่งที่ครูต้องกำหนดก่อนใช้ AI:</b><br>{must_define_clean}</div>"
+                    f"</div>"
+                )
                 st.markdown(card_html, unsafe_allow_html=True)
 
-        # เมนูจัดการและ Export สำหรับวิทยากร
         st.markdown("---")
         with st.expander("⚙️ เครื่องมือจัดการข้อมูลและส่งออกคะแนน (สำหรับวิทยากร)"):
             st.dataframe(df)
