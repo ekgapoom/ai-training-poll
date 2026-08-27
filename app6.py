@@ -140,8 +140,7 @@ PRESET_KEYWORDS = [
     "การโอบอุ้มเด็กกลุ่มเปราะบาง (Inclusivity & Care)",
     "การสร้างศรัทธาและความไว้วางใจ (Trust Building)",
     "การโค้ชชีวิตและให้คำปรึกษา (Life Coaching)",
-    "อารมณ์ขันและบรรยากาศความสุข (Human Warmth)",
-    "✨ อื่น ๆ (ระบุคีย์เวิร์ดด้วยตนเอง)"
+    "อารมณ์ขันและบรรยากาศความสุข (Human Warmth)"
 ]
 
 # --- 5. เมนูด้านข้าง ---
@@ -178,25 +177,24 @@ if view_mode == "📱 สำหรับนักศึกษา (สะท้�
                 student_id = st.text_input("รหัสนักศึกษา / สาขาวิชา:", placeholder="เช่น 66123456 เอกคอมพิวเตอร์ศึกษา")
 
             st.markdown("---")
-            st.markdown("#### 🏷️ 1. เลือกคีย์เวิร์ดทักษะที่ AI แทนไม่ได้ (เลือกได้ 1–3 ข้อ)")
+            st.markdown("#### 🏷️ 1. เลือกคีย์เวิร์ดทักษะที่ AI แทนไม่ได้ (เลือกได้มากกว่า 1 ข้อ)")
             selected_kw = st.multiselect(
-                "เลือกคีย์เวิร์ดที่ตรงใจท่านที่สุด:",
+                "เลือกคีย์เวิร์ดจากรายการมาตรฐาน:",
                 options=PRESET_KEYWORDS,
                 default=[PRESET_KEYWORDS[0]]
             )
 
-            custom_kw_input = ""
-            if "✨ อื่น ๆ (ระบุคีย์เวิร์ดด้วยตนเอง)" in selected_kw:
-                custom_kw_input = st.text_input(
-                    "ระบุคีย์เวิร์ดของท่านเอง (สั้นๆ 1-2 คำ):",
-                    placeholder="เช่น การกอดปลอบใจ, แววตาแห่งความหวัง"
-                )
+            # เปิดให้พิมพ์คำเพิ่มเติมได้ทันทีโดยไม่ต้องรอเงื่อนไข if
+            custom_kw_input = st.text_input(
+                "✨ หรือระบุคีย์เวิร์ดอื่น ๆ เพิ่มเติมด้วยตนเอง (คั่นด้วยเครื่องหมายจุลภาค , หากมีหลายคำ):",
+                placeholder="เช่น การกอดปลอบใจ, สายตาแห่งความหวัง, รอยยิ้มจริงใจ"
+            )
 
             st.markdown("---")
             st.markdown("#### 💬 2. การสะท้อนคิดเชิงลึก (Reflection Story)")
             reflection_story = st.text_area(
                 "ทำไมทักษะนี้จึงสำคัญ และท่านจะนำไปใช้ดูแลผู้เรียนจริงในห้องเรียนอย่างไร?",
-                placeholder="เล่ามุมมองหรือเหตุการณ์สั้นๆ เช่น AI อาจตรวจข้อสอบได้เร็วกว่า แต่เมื่อเด็กกำลังร้องไห้หรือหมดไฟ มีเพียงครูที่เป็นมนุษย์เท่านั้นที่จะสัมผัสใจและประคองเขาขึ้นมาได้...",
+                placeholder="เล่ามุมมองสั้นๆ เช่น AI ตรวจข้อสอบได้เร็วกว่า แต่เมื่อเด็กกำลังหมดไฟ มีเพียงครูที่เป็นมนุษย์เท่านั้นที่จะสัมผัสใจและประคองเขาขึ้นมาได้...",
                 height=90
             )
 
@@ -209,10 +207,11 @@ if view_mode == "📱 สำหรับนักศึกษา (สะท้�
             submit_btn = st.form_submit_button("🚀 ส่งคำสะท้อนคิดขึ้นกำแพง AAR", use_container_width=True)
 
             if submit_btn:
-                # รวบรวมคีย์เวิร์ด
-                final_keywords = [k for k in selected_kw if k != "✨ อื่น ๆ (ระบุคีย์เวิร์ดด้วยตนเอง)"]
+                # รวมคีย์เวิร์ดที่เลือก + คีย์เวิร์ดที่พิมพ์เอง
+                final_keywords = list(selected_kw)
                 if custom_kw_input.strip():
-                    final_keywords.append(custom_kw_input.strip())
+                    custom_items = [c.strip() for c in custom_kw_input.split(",") if c.strip()]
+                    final_keywords.extend(custom_items)
 
                 if not student_name or not student_id or not final_keywords or not reflection_story or not teacher_pledge:
                     st.error("⚠️ กรุณากรอกข้อมูลให้ครบถ้วนทุกช่องก่อนส่งครับ")
@@ -251,15 +250,14 @@ else:
         m1, m2 = st.columns([1, 3])
         m1.metric("👥 ผู้ร่วมสะท้อนคิด", f"{total_users} คน")
 
-        # ประมวลผลคีย์เวิร์ดทั้งหมดสำหรับทำ Word Cloud / Frequency Report
+        # ประมวลผลคีย์เวิร์ดทั้งหมดสำหรับทำ Frequency Chart / Word Ranking
         all_kw_list = []
         for kw_str in df["keywords"].dropna():
-            all_kw_list.extend([k.strip() for k in kw_str.split(",") if k.strip()])
+            all_kw_list.extend([k.strip() for k in str(kw_str).split(",") if k.strip()])
         
         kw_counts = pd.Series(all_kw_list).value_counts().reset_index()
         kw_counts.columns = ["ทักษะที่ AI แทนไม่ได้", "จำนวนครั้งที่เลือก"]
 
-        # กราฟแท่งสีสันสดใสแนว Word-Ranking
         fig_kw = px.bar(
             kw_counts.head(10),
             x="จำนวนครั้งที่เลือก",
