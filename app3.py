@@ -3,16 +3,17 @@ import sqlite3
 import pandas as pd
 import qrcode
 from io import BytesIO
+import textwrap
 
-# --- ตั้งค่าหน้าเว็บ ---
+# --- 1. ตั้งค่าหน้าเว็บ ---
 st.set_page_config(
     page_title="กิจกรรมที่ 3: AI Persona Simulation Canvas",
     page_icon="🧩",
     layout="wide"
 )
 
-# --- ตกแต่ง CSS ให้สวยงาม เหมาะกับการแสดงผลทั้งมือถือและโปรเจกเตอร์ ---
-st.markdown("""
+# --- 2. ปรับแต่ง CSS ---
+custom_css = textwrap.dedent("""
 <style>
     .main-header {
         font-size: 24px;
@@ -31,6 +32,7 @@ st.markdown("""
         padding: 18px;
         margin-bottom: 18px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid #E2E8F0;
         border-top: 5px solid #3B82F6;
     }
     .badge {
@@ -60,9 +62,10 @@ st.markdown("""
         margin-top: 10px;
     }
 </style>
-""", unsafe_allow_html=True)
+""")
+st.markdown(custom_css, unsafe_allow_html=True)
 
-# --- ระบบฐานข้อมูล SQLite ---
+# --- 3. ระบบฐานข้อมูล SQLite ---
 DB_NAME = "persona_simulation.db"
 
 def init_db():
@@ -113,7 +116,7 @@ def clear_db():
 
 init_db()
 
-# --- เมนูด้านข้าง (Navigation) ---
+# --- 4. เมนูด้านข้าง (Navigation) ---
 st.sidebar.title("🧩 Activity 3 Control")
 view_mode = st.sidebar.radio(
     "เลือกหน้าจอแสดงผล:",
@@ -121,13 +124,15 @@ view_mode = st.sidebar.radio(
 )
 
 # ==============================================================================
-# 1. หน้านักศึกษา (Student Form Submission)
+# 5. หน้าสำหรับผู้เข้าอบรม (Student Form Submission)
 # ==============================================================================
 if view_mode == "📱 สำหรับผู้เข้าอบรม (บันทึกข้อมูล)":
-    st.markdown("<div class='main-header'>🧩 กิจกรรมที่ 3: AI Persona Simulation</div>", unsafe_allow_html=True)
-    st.markdown("<div class='sub-header'>โจทย์: Co-thinking with AI (ค้นหา Pain Points และ Unmet Needs ของผู้เรียน)</div>", unsafe_allow_html=True)
+    header_html = textwrap.dedent("""
+    <div class='main-header'>🧩 กิจกรรมที่ 3: AI Persona Simulation</div>
+    <div class='sub-header'>โจทย์: Co-thinking with AI (ค้นหา Pain Points และ Unmet Needs ของผู้เรียน)</div>
+    """)
+    st.markdown(header_html, unsafe_allow_html=True)
 
-    # กล่องแนะนำ Prompt จำลอง Persona
     with st.expander("💡 คลิกเพื่อคัดลอก 'ตัวอย่างคำสั่ง Prompt สวมบทบาท AI'", expanded=False):
         prompt_example = "จงสวมบทบาทเป็น ด.ช.เอ อายุ 10 ขวบ มีภาวะสมาธิสั้น (ADHD) และรู้สึกเบื่อหน่ายวิชาคณิตศาสตร์ ตอบคำถามสั้นๆ ซื่อๆ ตามความรู้สึกและมุมมองของเด็กประถม"
         st.code(prompt_example, language="text")
@@ -174,7 +179,7 @@ if view_mode == "📱 สำหรับผู้เข้าอบรม (บ�
             hmw = st.text_input("💡 'เราจะช่วย...ได้อย่างไร' (How Might We Question):", 
                                 placeholder="เช่น เราจะช่วยให้เด็กสมาธิสั้นเข้าใจเศษส่วนผ่านกิจกรรมขยับร่างกายและเกมได้อย่างไร?")
 
-            submit_btn = st.form_submit_button("🚀 ส่งข้อมูล Canvas ขึ้นจอโปรเจกเตอร์", use_container_width=True)
+            submit_btn = st.form_submit_button("🚀 ส่งข้อมูล ", use_container_width=True)
 
             if submit_btn:
                 if not group_name or not hmw or not pain_points:
@@ -184,19 +189,22 @@ if view_mode == "📱 สำหรับผู้เข้าอบรม (บ�
                     st.session_state.submitted_act3 = True
                     st.rerun()
     else:
-        st.success("🎉 บันทึกผลงาน Problem Statement Canvas เรียบร้อยแล้ว! ข้อมูลถูกส่งขึ้นจอวิทยากรแล้วครับ")
+        st.success("🎉 บันทึกผลงาน Problem Statement Canvas เรียบร้อยแล้ว! ข้อมูลถูกส่งให้วิทยากรแล้วครับ")
         if st.button("➕ ส่งผลงานเพิ่มเติม / แก้ไข"):
             st.session_state.submitted_act3 = False
             st.rerun()
 
 # ==============================================================================
-# 2. หน้าจอโปรเจกเตอร์ / Canva Embed (Live Showcase Canvas Dashboard)
+# 6. หน้าจอโปรเจกเตอร์ / Canva Embed (Live Showcase Canvas Dashboard)
 # ==============================================================================
 else:
     col_t, col_btn = st.columns([3, 1])
     with col_t:
-        st.markdown("<div class='main-header'>📊 Showcase: Problem Statement Canvas</div>", unsafe_allow_html=True)
-        st.markdown("<div class='sub-header'>รวบรวมโจทย์นวัตกรรมจากการสัมภาษณ์ Persona AI ของทุกกลุ่ม</div>", unsafe_allow_html=True)
+        showcase_header = textwrap.dedent("""
+        <div class='main-header'>📊 Showcase: Problem Statement Canvas</div>
+        <div class='sub-header'>รวบรวมโจทย์นวัตกรรมจากการสัมภาษณ์ Persona AI ของทุกกลุ่ม</div>
+        """)
+        st.markdown(showcase_header, unsafe_allow_html=True)
     with col_btn:
         if st.button("🔄 อัปเดตข้อมูลสด (Refresh)", use_container_width=True):
             st.rerun()
@@ -205,8 +213,6 @@ else:
 
     if df.empty:
         st.warning("⏳ ยังไม่มีกลุ่มใดส่ง Canvas... สามารถสแกน QR Code ด้านล่างเพื่อเริ่มส่งข้อมูล")
-        
-        # ส่วนแสดง QR Code สำหรับสแกนเข้าหน้าบันทึก
         app_url = st.text_input("ระบุ URL ของ Web App นี้เพื่อสร้าง QR Code:", "http://localhost:8501")
         qr = qrcode.make(app_url)
         buf = BytesIO()
@@ -216,12 +222,12 @@ else:
         st.info(f"🎉 มีกลุ่มส่งผลงานแล้วทั้งหมด **{len(df)}** กลุ่ม")
         st.markdown("---")
 
-        # แสดงผล Canvas การ์ดแบบ 2 คอลัมน์บนจอโปรเจกเตอร์
+        # แสดงผล Canvas Card แบบ 2 คอลัมน์ (ใช้ textwrap.dedent ตัด Indent เพื่อให้ HTML เรนเดอร์ถูกต้อง)
         cols = st.columns(2)
         for idx, row in df.iterrows():
             col_target = cols[idx % 2]
             with col_target:
-                st.markdown(f"""
+                card_html = textwrap.dedent(f"""
                 <div class='canvas-card'>
                     <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;'>
                         <span style='font-size: 18px; font-weight: bold; color: #1E40AF;'>🏆 {row['group_name']}</span>
@@ -248,22 +254,20 @@ else:
                         💡 <b>How Might We (โจทย์นวัตกรรม):</b><br>{row['how_might_we']}
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
+                st.markdown(card_html, unsafe_allow_html=True)
 
-        # จัดการข้อมูลด้านล่าง (Export & Clear)
+        # เมนูจัดการข้อมูลสำหรับวิทยากร
         st.markdown("---")
         with st.expander("⚙️ เครื่องมือจัดการข้อมูลและดาวน์โหลด (สำหรับวิทยากร)"):
             st.dataframe(df)
-            
-            # ปุ่ม Export เป็น CSV
             csv_data = df.to_csv(index=False).encode('utf-8-sig')
             st.download_button(
-                label="📥 ดาวน์โหลดข้อมูลทั้งหมดเป็น CSV (Excel รองรับภาษาไทย)",
+                label="📥 ดาวน์โหลดข้อมูลทั้งหมดเป็น CSV (เปิดใน Excel รองรับภาษาไทย)",
                 data=csv_data,
                 file_name="activity3_persona_canvas.csv",
                 mime="text/csv"
             )
-            
-            if st.button("🗑️ ล้างข้อมูลทั้งหมดเพื่อเริ่มกลุ่มใหม่", type="primary"):
+            if st.button("🗑️ ล้างข้อมูลทั้งหมดเพื่อเริ่มรอบใหม่", type="primary"):
                 clear_db()
                 st.rerun()
